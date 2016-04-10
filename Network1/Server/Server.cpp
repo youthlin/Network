@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 
 	char sendBuf[100];
 	memset(sendBuf, 0, sizeof(sendBuf));
-	sprintf_s(sendBuf, "Welcome %s.  type 1 to get time,0 to exit.", inet_ntoa(clientAddr.sin_addr));
+	sprintf_s(sendBuf, "Welcome %s.  type date to get time,q to exit.", inet_ntoa(clientAddr.sin_addr));
 	send(connSocket, sendBuf, strlen(sendBuf) + 1, 0);
 	char recvBuf[100];
 	while (true)
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 			exit(0);
 		}
 		else {
-			sprintf_s(sendBuf, "Type 1 to get time,0 to exit.");
+			sprintf_s(sendBuf, "Type date to get time,q to exit.");
 			send(connSocket, sendBuf, strlen(sendBuf) + 1, 0);
 		}
 	}

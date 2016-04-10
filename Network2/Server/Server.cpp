@@ -29,7 +29,7 @@ typedef struct __THREAD_DATA
 //线程函数
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
-	THREAD_DATA* pThreadData = (THREAD_DATA*)lpParameter;
+	THREAD_DATA* pThreadData = static_cast<THREAD_DATA*>(lpParameter);
 	SOCKET connSocket = pThreadData->connSocket;
 	SOCKADDR_IN clientAddr = pThreadData->clientAddr;
 	int id = pThreadData->id;
@@ -37,7 +37,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	printf("客户端%d已连接\n", id);
 	char sendBuf[100];
 	memset(sendBuf, 0, sizeof(sendBuf));
-	sprintf_s(sendBuf, "Welcome %s, You are No.%d.  type 1 to get time,0 to exit.", inet_ntoa(clientAddr.sin_addr),id);
+	sprintf_s(sendBuf, "Welcome %s, You are No.%d.  type date to get time,q to exit.", inet_ntoa(clientAddr.sin_addr), id);
 	send(connSocket, sendBuf, strlen(sendBuf) + 1, 0);
 	char recvBuf[100];
 	while (true)
@@ -60,7 +60,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 			break;
 		}
 		else {
-			sprintf_s(sendBuf, "Type 1 to get time,0 to exit.");
+			sprintf_s(sendBuf, "Type date to get time,q to exit.");
 			send(connSocket, sendBuf, strlen(sendBuf) + 1, 0);
 		}
 	}
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 	addrSrv.sin_family = AF_INET;
 	addrSrv.sin_port = htons(port);
 	//绑定
-	iRet = bind(serverSocket, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
+	iRet = bind(serverSocket, reinterpret_cast<SOCKADDR*>(&addrSrv), sizeof(SOCKADDR));
 	if (iRet == SOCKET_ERROR)
 	{
 		cout << "bind(serverSocket, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR)) execute failed!" << endl;
@@ -130,16 +130,17 @@ int main(int argc, char** argv)
 	int len = sizeof(SOCKADDR);
 	vector<HANDLE> threads;
 	int count = 0;
+	cout << "Server is started\n";
 	while (1)
 	{
-		SOCKET connSocket = accept(serverSocket, (SOCKADDR*)&clientAddr, &len);
+		SOCKET connSocket = accept(serverSocket, reinterpret_cast<SOCKADDR*>(&clientAddr), &len);
 		if (connSocket == INVALID_SOCKET)
 		{
 			cout << "accept(serverSocket, (SOCKADDR*)&clientAddr, &len) execute failed!" << endl;
 			return -1;
 		}
 		THREAD_DATA threadData1(connSocket, clientAddr, count++);
-		HANDLE thread = CreateThread(NULL, 0, ThreadProc, &threadData1, 0, NULL);
+		HANDLE thread = CreateThread(nullptr, 0, ThreadProc, &threadData1, 0, nullptr);
 		threads.push_back(thread);
 	}
 	return 0;

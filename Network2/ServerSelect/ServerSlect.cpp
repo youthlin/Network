@@ -7,6 +7,7 @@
 #include "winsock.h"  
 #include "stdio.h"
 #include <ctime>
+#include <iostream>
 #pragma comment (lib,"wsock32.lib")  
 #define MAX 64
 
@@ -101,9 +102,18 @@ int main(int argc, char* argv[])
 	ser_addr.sin_family = AF_INET;
 	ser_addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	ser_addr.sin_port = htons(port);
-	bind(s, reinterpret_cast<sockaddr*>(&ser_addr), sizeof(ser_addr));
-
-	listen(s, 5);
+	i = bind(s, reinterpret_cast<sockaddr*>(&ser_addr), sizeof(ser_addr));
+	if (i == SOCKET_ERROR)
+	{
+		std::cout << "bind error\n";
+		return -1;
+	}
+	i = listen(s, 5);
+	if (i == SOCKET_ERROR)
+	{
+		std::cout << "listen error\n";
+		return -1;
+	}
 	timeout.tv_sec = 5;     // 如果套接字集合中在 1s 内没有数据，select 就会返回，超时 select 返回 0  
 	timeout.tv_usec = 0;
 	init_list(&sock_list);
@@ -117,7 +127,7 @@ int main(int argc, char* argv[])
 	sock_list.MainSock = s;
 	arg = 1;
 	ioctlsocket(sock_list.MainSock, FIONBIO, &arg);
-
+	std::cout << "Server is started\n";
 	while (1) {
 		make_fdlist(&sock_list, &readfds);
 		//make_fdlist(&sock_list,&writefds);  
@@ -146,7 +156,7 @@ int main(int argc, char* argv[])
 			insert_list(sock, &sock_list);
 
 			memset(sendBuf, 0, sizeof(sendBuf));
-			sprintf_s(sendBuf, "Welcome.  type 1 to get time,0 to exit.");
+			sprintf_s(sendBuf, "Welcome.  type date to get time,q to exit.");
 			send(sock, sendBuf, strlen(sendBuf) + 1, 0);
 
 		}
@@ -193,7 +203,7 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					sprintf_s(sendBuf, "Type 1 to get time,0 to exit.");
+					sprintf_s(sendBuf, "Type date to get time,q to exit.");
 					send(sock, sendBuf, strlen(sendBuf) + 1, 0);
 				}
 			}

@@ -1,4 +1,5 @@
-#include<iostream>
+#include <iostream>
+#include <string>
 #include <winsock2.h>
 using namespace std;
 #define BYE "BYE"
@@ -75,14 +76,18 @@ int main(int argc, char** argv)
 			WSACleanup();
 			break;
 		}
-		scanf("%d", &count);
+//		scanf("%d", &count);
+//
+//		if (count == 1)
+//			sprintf(sendBuf, "date");
+//		else if (count==0)
+//			sprintf(sendBuf, "q");
+//		else
+//			sprintf(sendBuf, "unknow");
+		string tmp;
+		cin >> tmp;
+		strcpy(sendBuf, tmp.c_str());
 
-		if (count == 1)
-			sprintf(sendBuf, "date");
-		else if (count==0)
-			sprintf(sendBuf, "q");
-		else
-			sprintf(sendBuf, "unknow");
 		count++;
 		send(clientSocket, sendBuf, strlen(sendBuf) + 1, 0);
 	}
